@@ -198,8 +198,8 @@ def main(prog_name, argv):
 
 
     #
-    outfile = args.infile.split(".vcf")[0] + "_q.{}_p.{}_m.{}_" + args.mother + "_processed.txt".format(args.qual, args.pvalue,
-                                                                                    args.min_parent)
+    outfile = args.infile.split(".vcf")[0] + "_q.{}_p.{}_m.{}_".format(args.qual, args.pvalue,
+                                                                                    args.min_parent) + args.mother + "_processed.txt"
     #
     # ## OPEN FILE
     with open(args.infile) as fh:

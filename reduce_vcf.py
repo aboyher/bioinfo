@@ -15,21 +15,26 @@ def get_hap(geno):
             hap1.append('.')
     return hap0,hap1
 
-df = pd.read_csv(sys.argv[2], header = None, index_col= 0 )
-loc = np.array(df)
+# df = pd.read_csv(sys.argv[2], header = None, index_col= 0 )
+# loc = np.array(df)
 
 
 
 with open(f, 'r') as fn:
-    line = fn.readline()
-    while line.startswith("##"):
-        line = fn.readline().rstrip('\n')
-    header = line.split("\t")[9:]
-    print(",".join(header))
-    # exit()
-    line = fn.readline().rstrip('\n')
-    while line:
+    for line in fn:
+        if line.startswith("##"):
+            continue
+
+        if line.startswith("#"):
+            header = line.split("\t")[9:]
+            header = [x.split(".R1")[0] for x in header]
+            print(",".join(header))
+            continue
+
         snp = line.split()
+        weight = float(snp[5])
+        if weight < 100:
+            continue
         # if int(snp[1]) not in loc:
         #     line = fn.readline().rstrip('\n')
         #     continue
@@ -39,16 +44,15 @@ with open(f, 'r') as fn:
 
         data = [x.split(":") for x in snp[9:]]
         geno = [x[0] for x in data]
-        eals = []
-        for g in geno:
-            if g != '.':
-                hap0,hap1 = g.split("/")
-                al = alleles[int(hap0)] + "/" + alleles[int(hap1)]
-            else:
-                al = '.'
-            eals.append(al)
+        # eals = []
+        # for g in geno:
+        #     if g != '.':
+        #         hap0,hap1 = g.split("/")
+        #         al = alleles[int(hap0)] + "/" + alleles[int(hap1)]
+        #     else:
+        #         al = '.'
+        #     eals.append(al)
 
         # print("{}".format(",".join(eals)))
         # print("{}".format(idx))
-        print("{},{}".format(idx,",".join(eals)))
-        line = fn.readline().rstrip('\n')
+        print("{},{}".format(idx,",".join(geno)))

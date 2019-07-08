@@ -1,0 +1,67 @@
+---
+title: "RNAseq10 TME7_v0.5j_0_Chromo Kallisto Sleuth"
+output: html_notebook
+---
+
+```{r}
+suppressMessages({
+  library(sleuth)
+}
+)
+
+setwd("/Users/aboyher/danforth/projects/cmd2/rnaseq10/tme7_v0.5j_0_chromo/kallisto")
+sample_id = dir(file.path('.', 'results'))
+sample_id
+```
+
+```{r}
+kal_dirs = file.path('.', 'results', sample_id)
+kal_dirs
+```
+
+```{r}
+s2c = read.table('pdata.csv', sep = ',', header = T, stringsAsFactors = F)
+s2c
+```
+
+```{r}
+s2c = dplyr::mutate(s2c, path = kal_dirs)
+print(s2c)
+```
+
+```{r}
+so = sleuth_prep(s2c, extra_bootstrap_summary = T)
+so = sleuth_fit(so, ~condition, 'full')
+so = sleuth_fit(so, ~1, 'reduced')
+so = sleuth_lrt(so, 'reduced', 'full')
+models(so)
+```
+
+```{r}
+sleuth_table = sleuth_results(so, 'reduced:full', 'lrt', show_all = F)
+sleuth_significant = dplyr::filter(sleuth_table, qval <= 0.1)
+nrow(sleuth_significant)
+head(sleuth_significant, 20)
+```
+
+```{r}
+plot_bootstrap(so, "tme7_0.15G029100", units = "est_counts", color_by = "condition")
+```
+
+```{r}
+sleuth_sig_ch12 = dplyr::filter(sleuth_significant, grepl("12G", target_id))
+head(sleuth_sig_ch12)
+
+```
+
+```{r}
+plot_bootstrap(so, "tme7_0.12G164100", units = "est_counts", color_by = "condition")
+```
+
+```{r}
+topten = head(sleuth_significant$target_id, 100)
+for (gene in topten){
+  print(plot_bootstrap(so, gene, units = "est_counts", color_by = "condition"))
+}
+```
+
